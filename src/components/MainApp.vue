@@ -2,12 +2,15 @@
   <div>
     <h1>Aplicació Principal</h1>
     <button @click="logout">Tanca Sessió</button>
-    
+
     <!-- Botons per mostrar/ocultar diferents components -->
     <button @click="toggleCreateExperiment">Crear Experiment</button>
     <button @click="toggleMyExperiments">Els meus Experiments</button>
     <button @click="toggleExperiments">DB d'Experiments</button>
     
+    <!-- Botó per accedir al component d'administrador -->
+    <button v-if="isAdmin" @click="goToAdmin">Admin Panel</button>
+
     <!-- Render el component CrearExperiment -->
     <CrearExperiment v-if="showCreateExperiment" @experimentCreated="onExperimentCreated" />
 
@@ -20,19 +23,21 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import CrearExperiment from '@/components/CrearExperiment.vue';
 import MyExperiments from '@/components/MyExperiments.vue';
 import ExperimentsView from '@/components/ExperimentsView.vue';
+import axios from 'axios';
 
 // Definim el router per navegar
 const router = useRouter();
 
-// Referencies per controlar la visibilitat dels components
+// Referències per controlar la visibilitat dels components
 const showCreateExperiment = ref(false);
 const showMyExperiments = ref(false);
 const showExperiments = ref(false);
+const isAdmin = ref(false); // Aquesta referència determinarà si l'usuari és admin
 
 // Funció per tancar sessió de l'usuari
 const logout = () => {
@@ -46,27 +51,24 @@ const logout = () => {
 // Funció per obrir/tancar component CrearExperiment
 const toggleCreateExperiment = () => {
   showCreateExperiment.value = !showCreateExperiment.value;
-  // Assegurem que Els meus Experiments i BdD d'Experiments estiguin ocultats si CrearExperiment es mostra
   if (showCreateExperiment.value) {
     showMyExperiments.value = false;
     showExperiments.value = false;
   }
 };
 
-//Funció per obrir/tancar component component MyExperiments
+// Funció per obrir/tancar component MyExperiments
 const toggleMyExperiments = () => {
   showMyExperiments.value = !showMyExperiments.value;
-  // Assegurem que CrearExperiment i BdD d'Experiments estiguin ocultats si Els meus Experiments es mostra
   if (showMyExperiments.value) {
     showCreateExperiment.value = false;
     showExperiments.value = false;
   }
 };
 
-//Funció per obrir/tancar component component ExperimentsView
+// Funció per obrir/tancar component ExperimentsView
 const toggleExperiments = () => {
   showExperiments.value = !showExperiments.value;
-  // Assegurem que CrearExperiment i Els meus Experiments estiguin ocultats si BdD d'Experiments es mostra
   if (showExperiments.value) {
     showCreateExperiment.value = false;
     showMyExperiments.value = false;
@@ -76,9 +78,39 @@ const toggleExperiments = () => {
 // Funció per gestionar pàgina quan es crea un nou experiment
 const onExperimentCreated = (newExperiment) => {
   console.log('Nou experiment creat:', newExperiment);
-  // Recordar implementar el codi per creacio del experiment
-  showCreateExperiment.value = false; // Tanquem el formulari després de la creació
+  showCreateExperiment.value = false;
 };
+
+// Funció per anar al component d'administració
+const goToAdmin = () => {
+  router.push('/admin');
+};
+
+// Funció per comprovar si l'usuari és admin
+const checkAdminRole = async () => {
+  const token = localStorage.getItem('token');
+  if (token) {
+    try {
+      const response = await axios.get('http://localhost/apiHydrolysisdb/check-role', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      
+      // Accessing response.data directly since axios parses JSON automatically
+      const data = response.data;
+      isAdmin.value = data.role === 'administrador';
+    } catch (error) {
+      console.error('Error checking admin role:', error);
+      isAdmin.value = false; // Handle the error, default to non-admin
+    }
+  } else {
+    isAdmin.value = false; // No token found, default to non-admin
+  }
+};
+
+// Quan es carrega el component, comprova si l'usuari és admin
+onMounted(() => {
+  checkAdminRole();
+});
 </script>
 
 <style scoped>

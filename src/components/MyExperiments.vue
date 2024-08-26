@@ -77,6 +77,9 @@
           <button @click="editExperiment(experiment)" :disabled="experiment.comprovacio === 'acceptat'">
             Modifica
           </button>
+          <button @click="deleteExperiment(experiment.experimentID)" :disabled="experiment.comprovacio === 'acceptat'">
+            Elimina
+          </button>
           <p v-if="experiment.comprovacio === 'acceptat'" style="color: red;">Aquest experiment està completat i no es pot modificar.</p>
         </div>
       </li>
@@ -249,11 +252,31 @@ export default {
               showDetails: false // Iniciar amb detalls ocultats
             };
           });
-        } else {
-          console.error('Estructura de resposta inesperada:', response.data);
-        }
+        } 
+      else {
+        // Si no hi ha experiment per que no surti error (perque no ho es)
+        this.experiments = []; // Buidem experiment array
+        console.log('No experiments found.');
+        //*Recordar afegir un missatge de que no teniu cap experiment
+      }
+      // }  else {
+      //     console.error('Estructura de resposta inesperada:', response.data);
+      //   }
       } catch (error) {
         console.error('Error en obtenir els experiments:', error);
+      }
+    },
+
+    // Manejar l'eliminació d'un experiment
+    async deleteExperiment(experimentID) {
+      try {
+        const token = localStorage.getItem('token');
+        await axios.delete(`http://localhost/apiHydrolysisdb/DeleteExperiment/${experimentID}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        this.fetchMyExperiments(); // Torna a obtenir la llista actualitzada d'experiments
+      } catch (error) {
+        console.error('Error deleting experiment:', error);
       }
     },
 

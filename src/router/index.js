@@ -5,6 +5,8 @@ import MainApp from '@/components/MainApp.vue';
 import ExperimentsView from '@/components/ExperimentsView.vue'; // Import the new page
 import CrearExperiment from '@/components/CrearExperiment.vue';
 import LineChart from '@/components/LineChart.vue';
+import AdminComponent from '@/components/AdminComponent.vue';
+import axios from 'axios';
 
 const routes = [
   {
@@ -39,7 +41,38 @@ const routes = [
     component: CrearExperiment,
     meta: { requiresAuth: true }
   },
-  // Redirect any unmatched paths to the experiments page
+  {
+    path: '/admin',
+    name: 'AdminComponent',
+    component: AdminComponent,
+    beforeEnter: async (to, from, next) => {
+      const token = localStorage.getItem('token');
+      if (token) {
+        try {
+          const response = await axios.get('http://localhost/apiHydrolysisdb/check-role', {
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          });
+          
+          // resposta del servidor
+          const data = response.data;
+          
+          if (data.role === 'administrador') {
+            next(); // Allow navigation to the target route
+          } else {
+            next('/main'); // Redirecció a la pagina main si no ets admin
+          }
+        } catch (error) {
+          console.error('Error checking role:', error);
+          next('/main'); // Redirecció a la pagina main si hi ha algun error
+        }
+      } else {
+        next('/login'); // Redirecció a la pagina login si no hi ha token
+      }
+    }
+  },
+
   {
     path: '/:pathMatch(.*)*',
     redirect: '/'
