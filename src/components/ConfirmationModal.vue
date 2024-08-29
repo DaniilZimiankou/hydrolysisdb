@@ -17,19 +17,29 @@
     </div>
   </template>
   
-  <script setup>
-  import { ref } from 'vue';
-  
-  const props = defineProps({
-    isVisible: Boolean,
-    message: String,
-  });
-  
-  const emit = defineEmits(['confirm', 'cancel']);
-  const confirm = () => emit('confirm');
-  const cancel = () => emit('cancel');
+  <script>
+  export default {
+    props: {
+      isVisible: {
+        type: Boolean,
+        required: true
+      },
+      message: {
+        type: String,
+        required: true
+      }
+    },
+    methods: {
+      confirm() {
+        this.$emit('confirm');
+      },
+      cancel() {
+        this.$emit('cancel');
+      }
+    }
+  }
   </script>
   
   <style scoped>
-  /* Tailwind CSS classes for styling */
+  /* Tailwind CSS or custom styles for styling */
   </style>
