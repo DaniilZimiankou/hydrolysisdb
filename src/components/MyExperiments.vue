@@ -48,6 +48,11 @@
       </div>
     </div>
 
+    <div v-if="noExperiment">
+      <h1>No tens experiments</h1>
+      <p>Els hi pots crear en l'apartat "Crear Experiment"</p>
+    </div>
+
     <ul>
       <li v-for="experiment in sortedAndFilteredExperiments" :key="experiment.experimentID">
         <span>{{ experiment.experimentID }}: {{ experiment.nom_experiment }}</span>
@@ -62,7 +67,7 @@
           <p>pH: {{ experiment.ph }}</p>
           <p>Temps: {{ experiment.temps }} minuts</p>
           <p>Temperatura: {{ experiment.temperatura }} °C</p>
-          <p>Concentració: {{ experiment.concentracio }} g/L</p>
+          <p>Concentració: {{ experiment.concentracio }} %</p>
           <p>Tipus: {{ experiment.tipus }}</p>
           <p>Grams: {{ experiment.grams }} g</p>
           <p>Nom: {{ experiment.nom }}</p>
@@ -74,10 +79,10 @@
           </div>
 
           <!-- Botó de modificar -->
-          <button @click="editExperiment(experiment)" :disabled="experiment.comprovacio === 'acceptat'">
+          <button @click="editExperiment(experiment)" :disabled="isAdmin === false && experiment.comprovacio === 'acceptat'">
             Modifica
           </button>
-          <button @click="deleteExperiment(experiment.experimentID)" :disabled="experiment.comprovacio === 'acceptat'">
+          <button @click="deleteExperiment(experiment.experimentID)" :disabled="isAdmin === false && experiment.comprovacio === 'acceptat'">
             Elimina
           </button>
           <p v-if="experiment.comprovacio === 'acceptat'" style="color: red;">Aquest experiment està completat i no es pot modificar.</p>
@@ -114,7 +119,7 @@
           </label>
           <label>
             Temps:
-            <input v-model.number="editingExperiment.temps" type="number" :disabled="isEditingDisabled" />
+            <input v-model.number="editingExperiment.temps" type="number" min="0" :disabled="isEditingDisabled" />
           </label>
           <label>
             Temperatura:
@@ -126,20 +131,24 @@
           </label>
           <label>
             Grams:
-            <input v-model.number="editingExperiment.grams" type="number" step="0.1" :disabled="isEditingDisabled" />
+            <input v-model.number="editingExperiment.grams" type="number" min="0" step="0.1" :disabled="isEditingDisabled" />
           </label>
           <label>
             Component:
             <select v-model="editingExperiment.componentID" :disabled="isEditingDisabled">
-              <option value="" disabled>Selecciona un component</option>
+              <!-- <option value="" disabled>Selecciona un component</option> -->
               <option v-for="component in components" :key="component.componentID" :value="component.componentID">
                 {{ component.nom }}
               </option>
             </select>
             <p v-if="formErrors.componentID" style="color: red;">Si us plau, selecciona un component.</p>
             <p v-if="formErrors.nom_experiment" style="color: red;">El nom ha de tenir almenys 2 caràcters.</p>
+            <p v-if="formErrors.ph" style="color: red;">Ph ha de ser entre 0.0 i 14.0</p>
+            <p v-if="formErrors.temps" style="color: red;">Temps no pot ser mes petit o igual a 0</p>
+            <p v-if="formErrors.concentracio" style="color: red;">Concentracio ha de ser entre 0 i 100</p>
+            <p v-if="formErrors.grams" style="color: red;">Pes en Grams no pot ser mes petit o igual a 0</p>
           </label>
-          <button type="button" @click="showChartModal = true">Modifica el gràfic</button>
+          <button type="button" @click="showChartModal = true" :disabled="isEditingDisabled">Modifica el gràfic</button>
           <button type="submit" :disabled="isEditingDisabled">Desa els canvis</button>
           <button @click="closeEditForm">Cancel·la</button>
         </form>
@@ -182,7 +191,9 @@ export default {
       showFilters: false, // Obrir tancar filtres
       sortOption: 'id', // Opció d'ordenació actual (per defecte pel ID)
       formErrors: {}, // Objecte per emmagatzemar errors de validació del formulari (de moment no funciona bé)
-      showChartModal: false // Obrir tancar chart creation modal
+      showChartModal: false, // Obrir tancar chart creation modal
+      isAdmin: false,
+      noExperiment: false
     };
   },
   components: {
@@ -191,7 +202,11 @@ export default {
   computed: {
     // Combrobem si la edició de l'experiment esta desactivada (per exemple quan l'experiment esta marcat com 'acceptat')
     isEditingDisabled() {
-      return this.editingExperiment && this.editingExperiment.comprovacio === 'acceptat';
+      const isDisabled = this.editingExperiment && 
+                        this.editingExperiment.comprovacio === 'acceptat' && 
+                        !this.isAdmin;
+      console.log('isEditingDisabled:', isDisabled); // Debugging output
+      return isDisabled;
     },
     
     // Combrobem els experiments filtrats i ordenats segons els filtres i l'opció de la ordenació actual
@@ -262,6 +277,7 @@ export default {
       else {
         // Si no hi ha experiment per que no surti error (perque no ho es)
         this.experiments = []; // Buidem experiment array
+        this.noExperiment = true;
         console.log('No experiments found.');
         //*Recordar afegir un missatge de que no teniu cap experiment
       }
@@ -340,7 +356,8 @@ export default {
           title: experiment.chartData.title,
           hAxis: { title: 'Eix X' },
           vAxis: { title: 'Eix Y' },
-          legend: 'none'
+          legend: 'none',
+          pointSize: 5
         };
 
         const chart = new google.visualization.LineChart(document.getElementById('chart-' + experiment.experimentID));
@@ -354,7 +371,6 @@ export default {
     async editExperiment(experiment) {
       this.editingExperiment = { ...experiment }; //Crear una còpia de les dades de l'experiment
       await this.fetchComponents(); //Obtenir la llista de components per seleccionar durant l'edició
-
       // Configurem el component seleccionat en el formulari
       this.$nextTick(() => {
         const selectElement = this.$el.querySelector('select[v-model="editingExperiment.componentID"]');
@@ -370,8 +386,20 @@ export default {
       if (!this.editingExperiment.componentID) {
         this.formErrors.componentID = true; // Error si no esta seleccionat un component
       }
-      if (this.editingExperiment.nom_experiment.length > 0 && this.editingExperiment.nom_experiment.length < 2) {
+      if (this.editingExperiment.nom_experiment.length >= 0 && this.editingExperiment.nom_experiment.length < 2) {
         this.formErrors.nom_experiment = true; // Error si el nom és massa curt nom.length < 2
+      }
+      if (this.editingExperiment.ph < 0 && this.editingExperiment.ph > 14) {
+        this.formErrors.ph = true; // Error si el ph no es entre 0 i 14
+      }
+      if (this.editingExperiment.temps <= 0) {
+        this.formErrors.temps = true; // Error si el temps és mes petit que 0
+      }
+      if (this.editingExperiment.concentracio < 0 && this.editingExperiment.concentracio > 100) {
+        this.formErrors.concentracio = true; // Error si concentracio no es entre 0 i 100
+      }
+      if (this.editingExperiment.grams <= 0) {
+        this.formErrors.grams = true; // Error si el pes en grams es mes petit que 0
       }
       return Object.keys(this.formErrors).length === 0; // Retorna si no hi ha errors
     },
@@ -388,6 +416,7 @@ export default {
         await axios.post('http://localhost/apiHydrolysisdb/UpdateExperiment', this.editingExperiment, {
           headers: { Authorization: `Bearer ${token}` }
         });
+        console.log(this.editingExperiment);
         await this.fetchMyExperiments(); // Actualitza la llista d'experiments després de l'actualitzacio (basicament torna a carregar els experiments)
         this.editingExperiment = null; // Tancar el formulari d'edició
       } catch (error) {
@@ -425,12 +454,33 @@ export default {
     // Aplicar els filtres seleccionats
     applyFilters() {
       // El mètode és cridat automàticament per la propietat del computed:
-    }
+    },
+
+    async checkUserRole() {
+      const token = localStorage.getItem('token');
+      try {
+        const response = await axios.get('http://localhost/apiHydrolysisdb/check-role', {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
+        
+        // Update the isAdmin state based on the server response
+        this.isAdmin = response.data.role === 'administrador';
+      } catch (error) {
+        console.error('Error checking user role:', error);
+        // Handle error appropriately, e.g., setting isAdmin to false or handling retries
+        this.isAdmin = false;
+      }
+    },
   },
   created() {
+    // Fetch the user role status when the component is created
+    this.checkUserRole();
     // Quan es crea el component, obtenir els experiments i components + debug
     this.fetchMyExperiments();
     this.fetchComponents();
+    
     // console.log('Experiments inicials:', this.experiments);
     // console.log('Components inicials:', this.components);
     // console.log('Experiment en edició inicial:', this.editingExperiment);

@@ -33,6 +33,10 @@
           </label>
         </div>
       </div>
+
+      <div v-if="noExperiment">
+        <h1>No tens experiments per acceptar/denegar</h1>
+      </div>
   
       <!-- Llista d'Experiments -->
       <ul>
@@ -84,6 +88,7 @@
         },
         showFilters: false, // obrir/tancar filtre
         sortOption: 'id', // filtrar pel defecte pel id
+        noExperiment: false
       };
     },
     computed: {
@@ -146,7 +151,9 @@
               };
             });
           } else {
-            console.error('Estructura de resposta inesperada:', response.data);
+            this.experiments = [];
+            this.noExperiment = true;
+            console.log('No experiments encontrats:');
           }
         } catch (error) {
           console.error('Error en obtenir experiments:', error);
@@ -208,7 +215,8 @@
             title: experiment.chartData.title,
             hAxis: { title: 'Eix X' },
             vAxis: { title: 'Eix Y' },
-            legend: 'none'
+            legend: 'none',
+            pointSize: 5
           };
   
           const chart = new google.visualization.LineChart(document.getElementById('chart-' + experiment.experimentID));

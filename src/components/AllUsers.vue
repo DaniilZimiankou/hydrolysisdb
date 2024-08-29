@@ -30,6 +30,11 @@
           </label>
         </div>
       </div>
+
+      <div v-if="noUsuaris">
+        <h1>No tens usuaris en la app</h1>
+        <p>Els hi pots crear en l'apartat "Crear Usuaris"</p>
+      </div>
   
       <ul>
         <li v-for="usuari in sortedAndFilteredusuaris" :key="usuari.usuariID">
@@ -67,7 +72,7 @@
             </label>
             <label>
               Email:
-              <input v-model="editingusuari.email" type="text"/>
+              <input v-model="editingusuari.email" type="email"/>
             </label>
             <label>
             Rol:
@@ -77,7 +82,8 @@
             </select>
             <p v-if="formErrors.cognoms" style="color: red;">Els cognoms han de tenir almenys 2 caràcters.</p>
             <p v-if="formErrors.nom" style="color: red;">El nom ha de tenir almenys 2 caràcters.</p>
-            <p v-if="formErrors.email" style="color: red;">El Email esta ocupat</p>
+            <p v-if="formErrors.emailOcupat" style="color: red;">El correu electrònic ja està ocupat.</p>
+            <p v-if="formErrors.email" style="color: red;">El format de correu electrònic no es correcte.</p>
           </label>
             <button type="submit">Desa els canvis</button>
             <button @click="closeEditForm">Cancel·la</button>
@@ -109,6 +115,7 @@
         showFilters: false, // Obrir tancar filtres
         sortOption: 'id', // Opció d'ordenació actual (per defecte pel ID)
         formErrors: {}, // Objecte per emmagatzemar errors de validació del formulari (de moment no funciona bé)
+        noUsuaris: false
       };
     },
     computed: {   
@@ -150,6 +157,7 @@
         this.usuaris = response.data
 
         } catch (error) {
+          this.noUsuaris = true;
           console.error('Error en obtenir els usuaris:', error);
         }
       },
@@ -179,6 +187,11 @@
         if (this.editingusuari.nom.length > 0 && this.editingusuari.nom.length < 2) {
           this.formErrors.nom = true; // Error si el nom és massa curt nom.length < 2
         }
+        // Validació del email
+        const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; // Expressió regular per validar l'email
+        if (!emailPattern.test(this.editingusuari.email)) {
+            this.formErrors.email = true; // Error si l'email no és vàlid
+        }
         return Object.keys(this.formErrors).length === 0; // Retorna si no hi ha errors
       },
   
@@ -199,7 +212,7 @@
         } catch (error) {
             if (error.response && error.response.status === 409) {
                 // Display an error message to the user
-                alert('The email is already in use by another user. Please use a different email.');
+                this.formErrors.emailOcupat = true;
             } else {
                 // Handle other errors
                 console.error('Error en actualitzar l\'usuari:', error);

@@ -10,6 +10,7 @@
       <div>
         <label for="nom_experiment">Nom de l'experiment:</label>
         <input type="text" v-model="experiment.nom_experiment" required />
+        <p v-if="formErrors.nom_experiment" style="color: red;">El nom ha de tenir almenys 3 caràcters.</p>
       </div>
 
       <!-- Estat -->
@@ -45,7 +46,7 @@
       <!-- Temps (en minuts) -->
       <div>
         <label for="temps">Temps (en minuts):</label>
-        <input type="number" v-model="experiment.temps" required />
+        <input type="number" v-model="experiment.temps" min="0" required />
       </div>
 
       <!-- Temperatura -->
@@ -73,7 +74,7 @@
       <!-- Concentració -->
       <div>
         <label for="concentracio">Concentració:</label>
-        <input type="number" v-model="experiment.concentracio" step="0.1" min="0" required />
+        <input type="number" v-model="experiment.concentracio" step="0.1" min="0" max="100" required />
       </div>
 
       <!-- Botó per crear el grafic -->
@@ -113,6 +114,7 @@ export default {
         concentracio: null, // Concentració
         chartData: null // Dades del grafic
       },
+      formErrors: {},
       components: [], // Llista de components disponibles
       showChartModal: false, // Obrir/tancar el modal del grafic
       isSubmitting: false // Controla si el formulari esta en proces de presentació
@@ -122,6 +124,16 @@ export default {
     CreateChart // Component per crear grafics (chart)
   },
   methods: {
+    // Mètode per validar el formulari
+    validateForm() {
+      this.formErrors = {}; // Neteja errors anteriors
+
+      if (this.experiment.nom_experiment.length < 3) {
+        this.formErrors.nom_experiment = true; // Afegeix error si el nom és massa curt
+      }
+
+      return Object.keys(this.formErrors).length === 0; // Retorna si no hi ha errors
+    },
     // Obtenir la llista de components del endpoint
     async fetchComponents() {
       try {
@@ -151,6 +163,10 @@ export default {
       }
 
       try {
+        if (!this.validateForm()) {
+        console.error('Validació del formulari fallida:', this.formErrors);
+        return; // Evitar l'enviament si la validació falla
+        }
         //Crear l'experiment
         const response = await axios.post('http://localhost/apiHydrolysisdb/CreateExperiment', this.experiment, config);
         this.experiment.id = response.data.id; // Agafarar l'ID de l'experiment

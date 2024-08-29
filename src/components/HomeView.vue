@@ -38,11 +38,12 @@
             </label>
             <label>
               Email:
-              <input v-model="editingusuari.email" type="text" />
+              <input v-model="editingusuari.email" type="email" />
             </label>
             <p v-if="formErrors.cognoms" style="color: red;">Els cognoms han de tenir almenys 2 caràcters.</p>
             <p v-if="formErrors.nom" style="color: red;">El nom ha de tenir almenys 2 caràcters.</p>
-            <p v-if="formErrors.email" style="color: red;">El correu electrònic ja està ocupat.</p>
+            <p v-if="formErrors.emailOcupat" style="color: red;">El correu electrònic ja està ocupat.</p>
+            <p v-if="formErrors.email" style="color: red;">El format de correu electrònic no es correcte.</p>
             <button type="submit">Desa els canvis</button>
             <button type="button" @click="closeEditForm">Cancel·la</button>
           </form>
@@ -96,6 +97,11 @@
         if (this.editingusuari.nom.length > 0 && this.editingusuari.nom.length < 2) {
           this.formErrors.nom = true; // Error si el nom és massa curt nom.length < 2
         }
+        // Validació del email
+        const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; // Expressió regular per validar l'email
+        if (!emailPattern.test(this.editingusuari.email)) {
+            this.formErrors.email = true; // Error si l'email no és vàlid
+        }
         return Object.keys(this.formErrors).length === 0; // Retorna si no hi ha errors
       },
       
@@ -116,7 +122,7 @@
         } catch (error) {
           if (error.response && error.response.status === 409) {
             // Display an error message to the user
-            this.formErrors.email = true;
+            this.formErrors.emailOcupat = true;
           } else {
             // Handle other errors
             console.error('Error en actualitzar l\'usuari:', error);

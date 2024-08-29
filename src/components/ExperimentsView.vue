@@ -37,6 +37,10 @@
       </div>
     </div>
 
+    <div v-if="noExperiment">
+        <h1>De moment no hi han experiment en la Base de Dates</h1>
+    </div>
+
     <!-- Llista d'Experiments -->
     <ul>
       <li v-for="experiment in sortedAndFilteredExperiments" :key="experiment.experimentID">
@@ -85,6 +89,7 @@ export default {
       },
       showFilters: false, // obrir/tancar filtre
       sortOption: 'id', // filtrar pel defecte pel id
+      noExperiment: false
     };
   },
   computed: {
@@ -148,7 +153,8 @@ export default {
             };
           });
         } else {
-          console.error('Estructura de resposta inesperada:', response.data);
+          this.noExperiment = true;
+          console.log('No experiments en DB');
         }
       } catch (error) {
         console.error('Error en obtenir experiments:', error);
@@ -210,7 +216,8 @@ export default {
           title: experiment.chartData.title,
           hAxis: { title: 'Eix X' },
           vAxis: { title: 'Eix Y' },
-          legend: 'none'
+          legend: 'none',
+          pointSize: 5
         };
 
         const chart = new google.visualization.LineChart(document.getElementById('chart-' + experiment.experimentID));

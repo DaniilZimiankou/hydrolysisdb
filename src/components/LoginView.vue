@@ -3,8 +3,8 @@
     <h1>Inicia Sessió</h1>
     <form @submit.prevent="login">
       <div>
-        <label for="username">Nom d'usuari</label>
-        <input type="text" id="username" v-model="username" required />
+        <label for="username">Email d'usuari</label>
+        <input type="email" id="username" v-model="username" required />
       </div>
       <div>
         <label for="password">Contrasenya</label>
@@ -36,7 +36,7 @@ const login = async () => {
     // Enviem la sol-licitud de login al endpoint
     const response = await axios.post('http://localhost/apiHydrolysisdb/Login', {
       UserEmail: username.value,
-      passwd: password.value
+      passwd: password.value // La verificació es fa al backend
     });
 
     // Comprovem la resposta del servidor
