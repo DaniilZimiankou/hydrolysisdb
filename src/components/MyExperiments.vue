@@ -161,6 +161,12 @@ import CreateChart from './ChartCreation.vue';
 /* global google */
 
 export default {
+  props: {
+    apiUrl: {
+      type: String, // Prop type is String
+      default: 'http://localhost/apiHydrolysisdb/MyExperiments' // Default API URL
+    }
+  },
   data() {
     return {
       experiments: [], // Llista dels experiments obtinguts des de la api
@@ -226,7 +232,7 @@ export default {
     async fetchMyExperiments() {
       try {
         const token = localStorage.getItem('token'); // Obtenir el token d'autenticació (jwt) des del localStorage
-        const response = await axios.get('http://localhost/apiHydrolysisdb/MyExperiments', {
+        const response = await axios.get(this.apiUrl, {
           headers: { Authorization: `Bearer ${token}` }
         });
 
@@ -425,19 +431,20 @@ export default {
     // Quan es crea el component, obtenir els experiments i components + debug
     this.fetchMyExperiments();
     this.fetchComponents();
-    console.log('Experiments inicials:', this.experiments);
-    console.log('Components inicials:', this.components);
-    console.log('Experiment en edició inicial:', this.editingExperiment);
-    console.log('Errors del formulari inicials:', this.formErrors);
-    console.log('Modal del gràfic visible inicialment:', this.showChartModal);
+    // console.log('Experiments inicials:', this.experiments);
+    // console.log('Components inicials:', this.components);
+    // console.log('Experiment en edició inicial:', this.editingExperiment);
+    // console.log('Errors del formulari inicials:', this.formErrors);
+    // console.log('Modal del gràfic visible inicialment:', this.showChartModal);
   },
   mounted() {
     // Quan es monta el component fem el debug (tot debug del codi s eliminara despres de finalitzar l'aplicació)
-    console.log('Experiments muntats:', this.experiments);
-    console.log('Components muntats:', this.components);
-    console.log('Experiment en edició muntat:', this.editingExperiment);
-    console.log('Errors del formulari muntats:', this.formErrors);
-    console.log('Modal del gràfic visible muntat:', this.showChartModal);
+    // console.log('Experiments muntats:', this.experiments);
+    // console.log('Components muntats:', this.components);
+    // console.log('Experiment en edició muntat:', this.editingExperiment);
+    // console.log('Errors del formulari muntats:', this.formErrors);
+    // console.log('Modal del gràfic visible muntat:', this.showChartModal);
+    console.log('API URL being used:', this.apiUrl); // Log the apiUrl to verify
   }
 };
 </script>

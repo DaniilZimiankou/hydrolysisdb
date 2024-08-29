@@ -7,6 +7,7 @@
     <button @click="toggleCreateExperiment">Crear Experiment</button>
     <button @click="toggleMyExperiments">Els meus Experiments</button>
     <button @click="toggleExperiments">DB d'Experiments</button>
+    <button @click="toggleHome">Home</button>
     
     <!-- Botó per accedir al component d'administrador -->
     <button v-if="isAdmin" @click="goToAdmin">Admin Panel</button>
@@ -19,6 +20,9 @@
 
     <!-- Render el component ExperimentsView -->
     <ExperimentsView v-if="showExperiments" />
+
+    <!-- Render el component HomeView -->
+    <HomeView v-if="showHome" />
   </div>
 </template>
 
@@ -28,6 +32,7 @@ import { useRouter } from 'vue-router';
 import CrearExperiment from '@/components/CrearExperiment.vue';
 import MyExperiments from '@/components/MyExperiments.vue';
 import ExperimentsView from '@/components/ExperimentsView.vue';
+import HomeView from '@/components/HomeView.vue';
 import axios from 'axios';
 
 // Definim el router per navegar
@@ -37,6 +42,7 @@ const router = useRouter();
 const showCreateExperiment = ref(false);
 const showMyExperiments = ref(false);
 const showExperiments = ref(false);
+const showHome = ref(false);
 const isAdmin = ref(false); // Aquesta referència determinarà si l'usuari és admin
 
 // Funció per tancar sessió de l'usuari
@@ -54,6 +60,7 @@ const toggleCreateExperiment = () => {
   if (showCreateExperiment.value) {
     showMyExperiments.value = false;
     showExperiments.value = false;
+    showHome.value = false;
   }
 };
 
@@ -63,6 +70,7 @@ const toggleMyExperiments = () => {
   if (showMyExperiments.value) {
     showCreateExperiment.value = false;
     showExperiments.value = false;
+    showHome.value = false;
   }
 };
 
@@ -72,6 +80,17 @@ const toggleExperiments = () => {
   if (showExperiments.value) {
     showCreateExperiment.value = false;
     showMyExperiments.value = false;
+    showHome.value = false;
+  }
+};
+
+// Funció per obrir/tancar component HomeView
+const toggleHome = () => {
+  showHome.value = !showHome.value;
+  if (showHome.value) {
+    showCreateExperiment.value = false;
+    showMyExperiments.value = false;
+    showExperiments.value = false;
   }
 };
 
