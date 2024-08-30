@@ -44,9 +44,16 @@
             <p v-if="formErrors.nom" style="color: red;">El nom ha de tenir almenys 2 caràcters.</p>
             <p v-if="formErrors.emailOcupat" style="color: red;">El correu electrònic ja està ocupat.</p>
             <p v-if="formErrors.email" style="color: red;">El format de correu electrònic no es correcte.</p>
-            <button type="submit">Desa els canvis</button>
+            <button type="button" @click="openConfirmModal">Desa els canvis</button>
             <button type="button" @click="closeEditForm">Cancel·la</button>
           </form>
+        <!-- Confirmation Modal -->
+        <ConfirmationModal
+            :isVisible="showConfirmModal"
+            message="Estàs segur que vols desar els canvis?"
+            @confirm="handleConfirm"
+            @cancel="showConfirmModal = false"
+        />
         </div>
       </div>
     </div>
@@ -54,9 +61,12 @@
   
   <script>
   import axios from 'axios';
-//   import ConfirmationModal from './ConfirmationModal.vue'; // Adjust the path as needed
+  import ConfirmationModal from './ConfirmationModal.vue';
   
   export default {
+    components: {
+      ConfirmationModal
+    },
     props: {
       apiUrl: {
         type: String,
@@ -68,10 +78,11 @@
         usuaris: null, // Dades del usuari obtingut des de la api
         editingusuari: null, // Objecte que emmagatzema les dades de l'usuari que estem modifican
         formErrors: {}, // Objecte per emmagatzemar errors de validació del formulari (de moment no funciona bé)
+        showConfirmModal: false // Controla la visibilitat del modal de confirmació
       };
     },
     methods: {
-    // Obté les dades d'usuari del servidor (api endpoint way)
+      // Obté les dades d'usuari del servidor (api endpoint way)
       async fetchUsuaris() {
         try {
           const token = localStorage.getItem('token'); // Obtenir el token d'autenticació (jwt) des del localStorage
@@ -83,7 +94,7 @@
           console.error('Error en obtenir els usuaris:', error);
         }
       },
-
+  
       // Iniciar el process d'edició d'un usuari
       editusuari(usuaris) {
         this.editingusuari = { ...usuaris };
@@ -91,7 +102,7 @@
       
       //Validacio del formulari d'edició
       validateForm() {
-        this.formErrors = {};// Neteja errors anteriors
+        this.formErrors = {}; // Neteja errors anteriors
         if (this.editingusuari.cognoms.length > 0 && this.editingusuari.cognoms.length < 2) {
           this.formErrors.cognoms = true; // Error si cognoms.length < 2
         }
@@ -101,7 +112,7 @@
         // Validació del email
         const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; // Expressió regular per validar l'email
         if (!emailPattern.test(this.editingusuari.email)) {
-            this.formErrors.email = true; // Error si l'email no és vàlid
+          this.formErrors.email = true; // Error si l'email no és vàlid
         }
         return Object.keys(this.formErrors).length === 0; // Retorna si no hi ha errors
       },
@@ -112,7 +123,7 @@
           console.error('Validació del formulari fallida:', this.formErrors);
           return; // Evitar l'enviacio si la validació falla
         }
-  
+    
         try {
           const token = localStorage.getItem('token');
           await axios.post('http://localhost/apiHydrolysisdb/UpdateMyUsuari', this.editingusuari, {
@@ -135,14 +146,24 @@
       // Tancar el formulari d'edició sense desar els canvis (un close)
       closeEditForm() {
         this.editingusuari = null;
+      },
+  
+      // Open confirmation modal
+      openConfirmModal() {
+        this.showConfirmModal = true;
+      },
+  
+      // Handle confirm action
+      async handleConfirm() {
+        this.showConfirmModal = false;
+        await this.updateusuari(); // Call updateusuari after confirmation
       }
     },
-    // Quan es crea el component, obtenir les dades del usuari
     created() {
       this.fetchUsuaris();
     },
     mounted() {
-      console.log('API URL being used:', this.apiUrl);// Log the apiUrl to verify
+      console.log('API URL being used:', this.apiUrl); // Log the apiUrl to verify
     }
   };
   </script>

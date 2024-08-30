@@ -2,10 +2,9 @@
   <div>
     <!-- Títol del formulari -->
     <h2>Crear Nou Experiment</h2>
-    
+
     <!-- Formulari per crear un experiment -->
     <form @submit.prevent="submitForm">
-      
       <!-- Nom de l'experiment -->
       <div>
         <label for="nom_experiment">Nom de l'experiment:</label>
@@ -91,6 +90,14 @@
         <button @click="closeChartModal">Tancar</button>
       </div>
     </div>
+
+    <!-- Modal d'èxit -->
+    <div v-if="showSuccessModal" class="modal-overlay" @click.self="closeSuccessModal">
+      <div class="modal-content">
+        <p>{{ successMessage }}</p>
+        <button @click="closeSuccessModal">Tancar</button>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -117,6 +124,8 @@ export default {
       formErrors: {},
       components: [], // Llista de components disponibles
       showChartModal: false, // Obrir/tancar el modal del grafic
+      showSuccessModal: false, // Mostrar/ocultar el modal d'èxit
+      successMessage: '', // Missatge d'èxit a mostrar
       isSubmitting: false // Controla si el formulari esta en proces de presentació
     };
   },
@@ -164,9 +173,11 @@ export default {
 
       try {
         if (!this.validateForm()) {
-        console.error('Validació del formulari fallida:', this.formErrors);
-        return; // Evitar l'enviament si la validació falla
+          console.error('Validació del formulari fallida:', this.formErrors);
+          this.isSubmitting = false; // Ensure isSubmitting is reset
+          return; // Evitar l'enviament si la validació falla
         }
+
         //Crear l'experiment
         const response = await axios.post('http://localhost/apiHydrolysisdb/CreateExperiment', this.experiment, config);
         this.experiment.id = response.data.id; // Agafarar l'ID de l'experiment
@@ -181,8 +192,9 @@ export default {
         // }
 
         // Notificar l'usuari i navegar
-        alert('Experiment i gràfic desats correctament!');
-        this.$router.push('/main'); // *Canviar la direccio
+        this.showSuccessModal = true; // Mostrar el modal d'èxit
+        this.successMessage = 'Experiment i gràfic desats correctament!';
+        this.clearForm(); // Neteja els camps del formulari
 
       } catch (error) {
         console.error('Error en crear l\'experiment o desar les dades del gràfic:', error);
@@ -201,6 +213,29 @@ export default {
     handleChartData(chartData) {
       this.experiment.chartData = chartData;
       this.closeChartModal(); // Tancar el modal després d'actualitzar les dades
+    },
+
+    // Tancar el modal d'èxit
+    closeSuccessModal() {
+      this.showSuccessModal = false;
+      this.$router.push('/main'); // Redirecciona després de tancar el modal
+    },
+
+    // Neteja els camps del formulari després d'un enviament reeixit
+    clearForm() {
+      this.experiment = {
+        nom_experiment: '',
+        estat: 'pendent',
+        comprovacio: 'no acceptat',
+        catalitzador: 'enzim',
+        ph: 7.0,
+        temps: null,
+        temperatura: null,
+        componentID: null,
+        grams: null,
+        concentracio: null,
+        chartData: null
+      };
     }
   },
   created() {

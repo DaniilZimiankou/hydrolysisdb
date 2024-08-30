@@ -1,10 +1,10 @@
 <template>
-    <div v-if="isVisible" class="fixed inset-0 flex items-center justify-center z-50">
-      <div class="bg-white shadow-lg rounded-lg w-80">
+    <div v-if="isVisible" class="modal-overlay">
+      <div class="modal-content">
         <div class="p-4">
           <h3 class="text-lg font-semibold">{{ message }}</h3>
           <div class="mt-4 flex justify-end space-x-2">
-            <button @click="confirm" class="bg-blue-500 text-white px-4 py-2 rounded">
+            <button @click="confirm" class="bg-white-500 text-white px-4 py-2 rounded">
               Sí
             </button>
             <button @click="cancel" class="bg-gray-300 text-gray-700 px-4 py-2 rounded">
@@ -41,5 +41,23 @@
   </script>
   
   <style scoped>
-  /* Tailwind CSS or custom styles for styling */
+  .modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .modal-content {
+    background-color: white;
+    padding: 20px;
+    border-radius: 5px;
+    width: 90%;
+    max-width: 500px;
+  }
   </style>

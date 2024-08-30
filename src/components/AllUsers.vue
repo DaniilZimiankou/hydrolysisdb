@@ -85,9 +85,15 @@
             <p v-if="formErrors.emailOcupat" style="color: red;">El correu electrònic ja està ocupat.</p>
             <p v-if="formErrors.email" style="color: red;">El format de correu electrònic no es correcte.</p>
           </label>
-            <button type="submit">Desa els canvis</button>
-            <button @click="closeEditForm">Cancel·la</button>
+            <button type="button" @click="openConfirmModal">Desa els canvis</button>
+            <button type="button" @click="closeEditForm">Cancel·la</button>
           </form>
+          <ConfirmationModal
+            :isVisible="showConfirmModal"
+            message="Estàs segur que vols desar els canvis?"
+            @confirm="handleConfirm"
+            @cancel="showConfirmModal = false"
+          />
         </div>
       </div>
     </div>
@@ -95,8 +101,12 @@
   
   <script>
   import axios from 'axios';
+  import ConfirmationModal from './ConfirmationModal.vue';
   
   export default {
+    components: {
+      ConfirmationModal
+    },
     props: {
       apiUrl: {
         type: String, // Prop type is String
@@ -115,7 +125,8 @@
         showFilters: false, // Obrir tancar filtres
         sortOption: 'id', // Opció d'ordenació actual (per defecte pel ID)
         formErrors: {}, // Objecte per emmagatzemar errors de validació del formulari (de moment no funciona bé)
-        noUsuaris: false
+        noUsuaris: false,
+        showConfirmModal: false // Controla la visibilitat del modal de confirmació
       };
     },
     computed: {   
@@ -234,6 +245,17 @@
       // Aplicar els filtres seleccionats
       applyFilters() {
         // El mètode és cridat automàticament per la propietat del computed:
+      },
+
+      // Open confirmation modal
+      openConfirmModal() {
+        this.showConfirmModal = true;
+      },
+  
+      // Handle confirm action
+      async handleConfirm() {
+        this.showConfirmModal = false;
+        await this.updateusuari(); // Call updateusuari after confirmation
       }
     },
     created() {
