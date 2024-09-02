@@ -1,47 +1,57 @@
 <template>
-  <div>
+  <div class="chart-creation-modal">
+    <!-- Header -->
+    <h3 class="modal-title">Crear Gràfic per a l'Experiment</h3>
 
-    <h3>Crear Gràfic per a l'Experiment</h3>
-    
-    <!-- Formulari per introduir les dades del grafic -->
-    <form @submit.prevent="submitChart">
-      
-      <div>
-        <label for="title">Títol del gràfic:</label>
-        <input type="text" v-model="localChartData.title" required />
+    <!-- Form to Input Chart Data -->
+    <form @submit.prevent="submitChart" class="chart-form">
+      <!-- Title Input -->
+      <div class="form-group">
+        <label for="title" class="form-label">Títol del gràfic:</label>
+        <input type="text" v-model="localChartData.title" required class="form-input" />
       </div>
 
-      <div>
-        <label for="xValue">Valor X:</label>
-        <input type="number" v-model.number="newXValue" />
+      <!-- X Value Input -->
+      <div class="form-group">
+        <label for="xValue" class="form-label">Valor X:</label>
+        <input type="number" v-model.number="newXValue" class="form-input" />
       </div>
 
-      <div>
-        <label for="yValue">Valor Y:</label>
-        <input type="number" v-model.number="newYValue" />
+      <!-- Y Value Input -->
+      <div class="form-group">
+        <label for="yValue" class="form-label">Valor Y:</label>
+        <input type="number" v-model.number="newYValue" class="form-input" />
       </div>
 
-      <!-- Botons per afegir o guardar el punt -->
-      <button type="button" @click="addPoint" :disabled="!canAddPoint">Afegir Punt</button>
-      <button type="submit" :disabled="localChartData.dates.length < 2">Desar Gràfic</button>
+      <!-- Add and Save Buttons -->
+      <div class="button-group">
+        <button type="button" @click="addPoint" :disabled="!canAddPoint" class="styled-button">
+          Afegir Punt
+        </button>
+        <button type="submit" :disabled="localChartData.dates.length < 2" class="styled-button save-button">
+          Desar Gràfic
+        </button>
+      </div>
     </form>
 
-    <!-- Seccio condicional per eliminar punts -->
-    <div v-if="localChartData.dates.length > 0">
+    <!-- Section to Remove Points -->
+    <div v-if="localChartData.dates.length > 0" class="remove-point-section">
       <div v-if="message" class="error-message">{{ message }}</div>
-      <div v-if="localChartData.dates.length > 0">
-        <label for="selectPoint">Selecciona el punt a eliminar:</label>
-        <select v-model="selectedPointIndex">
+      <div class="form-group">
+        <label for="selectPoint" class="form-label">Selecciona el punt a eliminar:</label>
+        <select v-model="selectedPointIndex" class="form-select">
           <option v-for="(point, index) in localChartData.dates" :key="index" :value="index">
             Punt {{ index + 1 }}: X={{ point[0] }}, Y={{ point[1] }}
           </option>
         </select>
-        <button @click="removePoint" :disabled="selectedPointIndex === null">Eliminar Punt</button>
+        <button @click="removePoint" :disabled="selectedPointIndex === null" class="styled-button remove-button">
+          Eliminar Punt
+        </button>
       </div>
     </div>
 
-    <!-- Div per mostrar el grafic -->
-    <div id="chart_div" style="width: 100%; height: 500px;"></div>
+    <!-- Div to Display the Chart -->
+    <div id="chart_div" class="chart-display"></div>
   </div>
 </template>
 
@@ -169,9 +179,128 @@ export default {
 </script>
 
 <style scoped>
+/* Modal Container */
+.chart-creation-modal {
+  max-width: 700px; /* Reduced width */
+  margin: 10px auto;
+  padding: 10px; /* Reduced padding */
+  background-color: #f9f9f9;
+  border-radius: 10px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  overflow-y: auto; /* Enable vertical scrolling */
+  max-height: 80vh; /* Constrain modal height */
+}
 
+/* Title */
+.modal-title {
+  font-size: 1.3em; /* Reduced font size */
+  margin-bottom: 8px; /* Reduced margin */
+  color: #333;
+}
+
+/* Form Styles */
+.chart-form {
+  margin-bottom: 10px; /* Reduced bottom margin */
+  display: grid;
+  grid-template-columns: 1fr 1fr; /* Two columns */
+  gap: 6px; /* Less gap between fields */
+}
+
+.form-group {
+  margin-bottom: 6px; /* Reduced margin */
+  text-align: left;
+}
+
+.form-label {
+  display: block;
+  margin-bottom: 2px; /* Reduced margin */
+  font-size: 0.85em; /* Reduced font size */
+  color: #555;
+}
+
+.form-input,
+.form-select {
+  width: 100%;
+  padding: 3px; /* Reduced padding */
+  font-size: 0.85em; /* Reduced font size */
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  transition: border-color 0.3s;
+}
+
+.form-input:focus,
+.form-select:focus {
+  border-color: #007bff;
+  outline: none;
+}
+
+/* Button Styles */
+.button-group {
+  display: flex;
+  justify-content: center;
+  gap: 6px; /* Reduced gap */
+  margin-top: 6px; /* Reduced margin */
+  grid-column: span 2; /* Span both columns */
+}
+
+.styled-button {
+  padding: 4px 10px; /* Reduced padding */
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 0.85em; /* Reduced font size */
+  transition: background-color 0.3s;
+}
+
+.styled-button:hover {
+  background-color: #0056b3;
+}
+
+.save-button {
+  background-color: #28a745;
+}
+
+.save-button:hover {
+  background-color: #218838;
+}
+
+.remove-button {
+  background-color: #dc3545;
+}
+
+.remove-button:hover {
+  background-color: #c82333;
+}
+
+/* Error Message */
 .error-message {
-  color: red;
-  margin: 10px 0;
+  color: #dc3545;
+  font-weight: bold;
+  margin-bottom: 6px; /* Reduced margin */
+  font-size: 0.85em; /* Reduced font size */
+}
+
+/* Chart Display */
+.chart-display {
+  width: 100%;
+  height: 250px; /* Further reduced height */
+  margin-top: 10px; /* Reduced top margin */
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Responsive Adjustments */
+@media (max-width: 700px) {
+  .chart-creation-modal {
+    max-width: 90%;
+  }
+
+  .chart-form {
+    grid-template-columns: 1fr; /* One column layout */
+  }
 }
 </style>

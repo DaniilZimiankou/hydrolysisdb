@@ -1,38 +1,53 @@
 <template>
-  <div class="register">
-    <h2>Registra't</h2>
-    <form @submit.prevent="register">
-      <div>
-        <label for="name">Nom:</label>
-        <input id="name" v-model="nom" type="text" required />
-        <p v-if="formErrors.nom" class="error">El nom ha de tenir almenys 2 caràcters.</p>
+  <div class="register-container">
+    <h2 class="register-title">Registra't</h2>
+    <form @submit.prevent="register" class="register-form">
+      <!-- Name Field -->
+      <div class="form-group">
+        <label for="name" class="form-label">Nom:</label>
+        <input id="name" v-model="nom" type="text" required class="form-input" />
+        <p v-if="formErrors.nom" class="error-message">El nom ha de tenir almenys 2 caràcters.</p>
       </div>
-      <div>
-        <label for="surname">Cognom:</label>
-        <input id="surname" v-model="cognoms" type="text" required />
-        <p v-if="formErrors.cognoms" class="error">Els cognoms han de tenir almenys 2 caràcters.</p>
+
+      <!-- Surname Field -->
+      <div class="form-group">
+        <label for="surname" class="form-label">Cognom:</label>
+        <input id="surname" v-model="cognoms" type="text" required class="form-input" />
+        <p v-if="formErrors.cognoms" class="error-message">Els cognoms han de tenir almenys 2 caràcters.</p>
       </div>
-      <div>
-        <label for="email">Correu electrònic:</label>
-        <input id="email" v-model="email" type="email" required />
-        <p v-if="formErrors.email" class="error">El correu electrònic introduït no és vàlid.</p>
-        <p v-if="formErrors.emailOcupat" class="error">El correu electrònic ocupat</p>
+
+      <!-- Email Field -->
+      <div class="form-group">
+        <label for="email" class="form-label">Correu electrònic:</label>
+        <input id="email" v-model="email" type="email" required class="form-input" />
+        <p v-if="formErrors.email" class="error-message">El correu electrònic introduït no és vàlid.</p>
+        <p v-if="formErrors.emailOcupat" class="error-message">El correu electrònic ocupat</p>
       </div>
-      <div>
-        <label for="password">Contrasenya:</label>
-        <input id="password" v-model="passwd" type="password" required />
-        <p v-if="formErrors.passwd" class="error">La contrasenya ha de tenir almenys 8 caràcters, incloent majúscules, minúscules i números.</p>
+
+      <!-- Password Field -->
+      <div class="form-group">
+        <label for="password" class="form-label">Contrasenya:</label>
+        <input id="password" v-model="passwd" type="password" required class="form-input" />
+        <p v-if="formErrors.passwd" class="error-message">
+          La contrasenya ha de tenir almenys 8 caràcters, incloent majúscules, minúscules i números.
+        </p>
       </div>
-      <div>
-        <label for="repeatPassword">Repiteix la contrasenya:</label>
-        <input id="repeatPassword" v-model="repeatPassword" type="password" required />
-        <p v-if="formErrors.repeatPassword" class="error">Les contrasenyes no coincideixen.</p>
+
+      <!-- Repeat Password Field -->
+      <div class="form-group">
+        <label for="repeatPassword" class="form-label">Repiteix la contrasenya:</label>
+        <input id="repeatPassword" v-model="repeatPassword" type="password" required class="form-input" />
+        <p v-if="formErrors.repeatPassword" class="error-message">Les contrasenyes no coincideixen.</p>
       </div>
-      <div>
-        <button type="submit">Registra't</button>
-        <button @click="goToLogin" type="button">Torna a Login</button>
+
+      <!-- Buttons -->
+      <div class="button-group">
+        <button type="submit" class="submit-button">Registra't</button>
+        <button @click="goToLogin" type="button" class="secondary-button">Torna a Login</button>
       </div>
-      <p v-if="errorMessage" class="error">{{ errorMessage }}</p>
+
+      <!-- Error Message -->
+      <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
     </form>
   </div>
 </template>
@@ -129,14 +144,101 @@ const goToLogin = () => {
 };
 </script>
 
-<style>
-.register {
+<style scoped>
+/* Container */
+.register-container {
   max-width: 400px;
-  margin: 0 auto;
+  margin: 30px auto;
+  padding: 20px;
+  background-color: #EAF9FF;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  border: 1px solid #ddd;
 }
-.error {
-  color: red;
+
+/* Title */
+.register-title {
+  font-size: 1.8em;
+  margin-bottom: 20px;
+  color: #333;
+}
+
+/* Form Styles */
+.register-form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+/* Form Group */
+.form-group {
+  text-align: left;
+}
+
+/* Labels */
+.form-label {
   font-size: 0.9em;
+  margin-bottom: 5px;
+  color: #666;
+  display: block;
+}
+
+/* Inputs */
+.form-input {
+  width: 95%;
+  padding: 8px;
+  font-size: 0.9em;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  transition: border-color 0.3s;
+}
+
+.form-input:focus {
+  border-color: #007bff;
+  outline: none;
+}
+
+/* Buttons */
+.button-group {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.submit-button,
+.secondary-button {
+  padding: 8px 15px;
+  font-size: 1em;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.submit-button {
+  background-color: #007bff;
+  color: #fff;
+}
+
+.submit-button:hover {
+  background-color: #0056b3;
+}
+
+.secondary-button {
+  background-color: #6c757d;
+  color: #fff;
+}
+
+.secondary-button:hover {
+  background-color: #5a6268;
+}
+
+/* Error Messages */
+.error-message {
+  font-size: 0.85em;
+  color: #dc3545;
   margin-top: 5px;
+  text-align: left;
 }
 </style>

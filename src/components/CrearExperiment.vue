@@ -1,63 +1,63 @@
 <template>
-  <div>
-    <!-- Títol del formulari -->
+  <div class="experiment-form-container">
+    <!-- Form Title -->
     <h2>Crear Nou Experiment</h2>
 
-    <!-- Formulari per crear un experiment -->
-    <form @submit.prevent="submitForm">
-      <!-- Nom de l'experiment -->
-      <div>
+    <!-- Form to Create an Experiment -->
+    <form @submit.prevent="submitForm" class="experiment-form">
+      <!-- Experiment Name -->
+      <div class="form-group">
         <label for="nom_experiment">Nom de l'experiment:</label>
-        <input type="text" v-model="experiment.nom_experiment" required />
-        <p v-if="formErrors.nom_experiment" style="color: red;">El nom ha de tenir almenys 3 caràcters.</p>
+        <input type="text" v-model="experiment.nom_experiment" required class="styled-input" />
+        <p v-if="formErrors.nom_experiment" class="error-message">El nom ha de tenir almenys 3 caràcters.</p>
       </div>
 
-      <!-- Estat -->
-      <div>
+      <!-- Status -->
+      <div class="form-group">
         <label for="estat">Estat:</label>
-        <select v-model="experiment.estat">
+        <select v-model="experiment.estat" class="styled-select">
           <option value="pendent">Pendent</option>
           <option value="acabat">Acabat</option>
           <option value="en_process">En procés</option>
         </select>
       </div>
 
-      <!-- Comprovació (no editable) -->
-      <div>
+      <!-- Verification (Read-Only) -->
+      <div class="form-group">
         <label for="comprovacio">Comprovació:</label>
-        <input type="text" v-model="experiment.comprovacio" readonly />
+        <input type="text" v-model="experiment.comprovacio" readonly class="styled-input" />
       </div>
 
-      <!-- Catalitzador -->
-      <div>
+      <!-- Catalyst -->
+      <div class="form-group">
         <label for="catalitzador">Catalitzador:</label>
-        <select v-model="experiment.catalitzador">
+        <select v-model="experiment.catalitzador" class="styled-select">
           <option value="enzim">Enzim</option>
         </select>
       </div>
 
-      <!-- pH (1.0 - 14.0 amb 1 decimal) -->
-      <div>
+      <!-- pH -->
+      <div class="form-group">
         <label for="ph">pH (0.0 - 14.0):</label>
-        <input type="number" v-model="experiment.ph" step="0.1" min="0" max="14.0" required />
+        <input type="number" v-model="experiment.ph" step="0.1" min="0" max="14.0" required class="styled-input" />
       </div>
 
-      <!-- Temps (en minuts) -->
-      <div>
+      <!-- Time (in Minutes) -->
+      <div class="form-group">
         <label for="temps">Temps (en minuts):</label>
-        <input type="number" v-model="experiment.temps" min="0" required />
+        <input type="number" v-model="experiment.temps" min="0" required class="styled-input" />
       </div>
 
-      <!-- Temperatura -->
-      <div>
+      <!-- Temperature -->
+      <div class="form-group">
         <label for="temperatura">Temperatura (°C):</label>
-        <input type="number" v-model="experiment.temperatura" required />
+        <input type="number" v-model="experiment.temperatura" required class="styled-input" />
       </div>
 
-      <!-- Nom del Component (Desplegable) -->
-      <div>
+      <!-- Component Name (Dropdown) -->
+      <div class="form-group">
         <label for="component_id">Nom del Component:</label>
-        <select v-model="experiment.componentID" required>
+        <select v-model="experiment.componentID" required class="styled-select">
           <option v-for="component in components" :key="component.componentID" :value="component.componentID">
             {{ component.nom }} ({{ component.tipus }})
           </option>
@@ -65,37 +65,37 @@
       </div>
 
       <!-- Grams -->
-      <div>
+      <div class="form-group">
         <label for="grams">Grams:</label>
-        <input type="number" v-model="experiment.grams" step="0.1" min="0" required />
+        <input type="number" v-model="experiment.grams" step="0.1" min="0" required class="styled-input" />
       </div>
 
-      <!-- Concentració -->
-      <div>
+      <!-- Concentration -->
+      <div class="form-group">
         <label for="concentracio">Concentració:</label>
-        <input type="number" v-model="experiment.concentracio" step="0.1" min="0" max="100" required />
+        <input type="number" v-model="experiment.concentracio" step="0.1" min="0" max="100" required class="styled-input" />
       </div>
 
-      <!-- Botó per crear el grafic -->
-      <button type="button" @click="showChartModal = true">Crear Gràfic</button>
+      <!-- Button to Create Chart -->
+      <button type="button" class="styled-button" @click="showChartModal = true">Crear Gràfic</button>
 
-      <!-- Botó per crear l'experiment -->
-      <button type="submit" :disabled="isSubmitting">Crear Experiment</button>
+      <!-- Button to Create Experiment -->
+      <button type="submit" :disabled="isSubmitting" class="styled-button submit-button">Crear Experiment</button>
     </form>
 
-    <!-- Modal per la creació del grafic -->
+    <!-- Modal for Chart Creation -->
     <div v-if="showChartModal" class="modal-overlay" @click.self="closeChartModal">
       <div class="modal-content">
         <CreateChart @chartData="handleChartData" />
-        <button @click="closeChartModal">Tancar</button>
+        <button @click="closeChartModal" class="styled-button">Tancar</button>
       </div>
     </div>
 
-    <!-- Modal d'èxit -->
+    <!-- Success Modal -->
     <div v-if="showSuccessModal" class="modal-overlay" @click.self="closeSuccessModal">
       <div class="modal-content">
         <p>{{ successMessage }}</p>
-        <button @click="closeSuccessModal">Tancar</button>
+        <button @click="closeSuccessModal" class="styled-button">Tancar</button>
       </div>
     </div>
   </div>
@@ -244,8 +244,122 @@ export default {
 };
 </script>
 
+
 <style scoped>
-form {
+/* Container */
+.experiment-form-container {
+  padding: 20px;
+  max-width: 800px;
+  margin: 0 auto;
+  background-color: #f7f9fc;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Form Title */
+.experiment-form-container h2 {
+  text-align: center;
+  color: #333;
+  font-size: 2rem;
+  margin-bottom: 20px;
+}
+
+/* Form */
+.experiment-form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+/* Form Group */
+.form-group {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 15px;
+}
+
+.form-group label {
+  font-weight: bold;
+  margin-bottom: 5px;
+  color: #333;
+}
+
+.styled-input,
+.styled-select {
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  font-size: 1rem;
+  width: 100%;
+  transition: border-color 0.3s;
+}
+
+.styled-input:focus,
+.styled-select:focus {
+  border-color: #4CAF50;
+  outline: none;
+}
+
+/* Error Message */
+.error-message {
+  color: red;
+  font-size: 0.9rem;
+  margin: 5px 0;
+}
+
+/* Buttons */
+.styled-button {
+  background-color: #4CAF50;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.2s;
+  margin-top: 10px;
+  align-self: flex-start;
+}
+
+.styled-button:hover {
+  background-color: #45a049;
+  transform: scale(1.05);
+}
+
+.submit-button {
+  align-self: flex-end;
+  background-color: #007BFF;
+}
+
+.submit-button:hover {
+  background-color: #0056b3;
+}
+
+/* Modals */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-content {
+  background-color: #ffffff;
+  padding: 30px;
+  border-radius: 10px;
+  width: 90%;
+  max-width: 800px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  position: relative;
+}
+
+/*OLD ones///////////////////////////////////////////////////////////*/
+
+/* form {
   margin-top: 20px;
 }
 
@@ -267,5 +381,5 @@ form {
   border-radius: 5px;
   width: 90%;
   max-width: 500px;
-}
+} */
 </style>

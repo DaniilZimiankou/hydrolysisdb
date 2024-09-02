@@ -1,33 +1,34 @@
 <template>
-  <div>
-    <div>
+  <div class="experiments-container">
+    <!-- Header Section -->
+    <div class="header-section">
       <h1>Els meus experiments</h1>
     </div>
 
-    <!-- Botó per obrir o tencar les opcions de filtre -->
-    <button @click="toggleFilterOptions">
+    <!-- Button to Toggle Filter Options -->
+    <button @click="toggleFilterOptions" class="toggle-button">
       {{ showFilters ? 'Tanca filtres' : 'Mostra filtres' }}
     </button>
 
-    <!-- Secció dels filtres -->
-    <div v-if="showFilters">
-      <!-- Inputs dels filtres -->
-      <div>
-        <input v-model="filters.name" placeholder="Filtra per nom" />
-        <input v-model.number="filters.id" type="number" placeholder="Filtra per ID" />
-        <select v-model="filters.component" @change="applyFilters">
+    <!-- Filter Section -->
+    <div v-if="showFilters" class="filters-section">
+      <!-- Filter Inputs -->
+      <div class="filter-inputs">
+        <input v-model="filters.name" placeholder="Filtra per nom" class="styled-input" />
+        <input v-model.number="filters.id" type="number" placeholder="Filtra per ID" class="styled-input" />
+        <select v-model="filters.component" @change="applyFilters" class="styled-select">
           <option value="">qualsevol component</option>
           <option v-for="component in components" :key="component" :value="component">
             {{ component.nom }}
           </option>
         </select>
-        <select v-model="filters.estat" @change="applyFilters">
+        <select v-model="filters.estat" @change="applyFilters" class="styled-select">
           <option value="">qualsevol estat</option>
           <option value="pendent">pendent</option>
           <option value="acabat">acabat</option>
           <option value="en process">en procés</option>
         </select>
-        <select v-model="filters.comprovacio" @change="applyFilters">
+        <select v-model="filters.comprovacio" @change="applyFilters" class="styled-select">
           <option value="">qualsevol comprovacio</option>
           <option value="no acceptat">no acceptat</option>
           <option value="acceptat">acceptat</option>
@@ -35,32 +36,35 @@
         </select>
       </div>
 
-      <!-- Opcions d'ordenacio -->
-      <div>
-        <label>
+      <!-- Sorting Options -->
+      <div class="sorting-options">
+        <label class="radio-label">
           <input type="radio" v-model="sortOption" value="id" />
           Ordena per ID
         </label>
-        <label>
+        <label class="radio-label">
           <input type="radio" v-model="sortOption" value="name" />
           Ordena per nom
         </label>
       </div>
     </div>
 
-    <div v-if="noExperiment">
+    <!-- No Experiments Message -->
+    <div v-if="noExperiment" class="no-experiments">
       <h1>No tens experiments</h1>
       <p>Els hi pots crear en l'apartat "Crear Experiment"</p>
     </div>
 
-    <ul>
-      <li v-for="experiment in sortedAndFilteredExperiments" :key="experiment.experimentID">
-        <span>{{ experiment.experimentID }}: {{ experiment.nom_experiment }}</span>
-        <button @click="toggleDetails(experiment.experimentID)">
+    <!-- Experiments List -->
+    <ul class="experiments-list">
+      <li v-for="experiment in sortedAndFilteredExperiments" :key="experiment.experimentID" class="experiment-item">
+        <span class="experiment-info">{{ experiment.experimentID }}: {{ experiment.nom_experiment }}</span>
+        <button @click="toggleDetails(experiment.experimentID)" class="toggle-button">
           {{ experiment.showDetails ? 'Tanca' : 'Obre' }}
         </button>
 
-        <div v-if="experiment.showDetails">
+        <!-- Experiment Details -->
+        <div v-if="experiment.showDetails" class="experiment-details">
           <p>Estat: {{ experiment.estat }}</p>
           <p>Comprovació: {{ experiment.comprovacio }}</p>
           <p>Catalitzador: {{ experiment.catalitzador }}</p>
@@ -72,36 +76,36 @@
           <p>Grams: {{ experiment.grams }} g</p>
           <p>Nom: {{ experiment.nom }}</p>
 
-          <!-- Renderitzar el grafic si existeixin dades del grafic -->
-          <div v-if="experiment.chartData.dates.length > 0" :id="'chart-' + experiment.experimentID">
+          <!-- Render Chart if Data Exists -->
+          <div v-if="experiment.chartData.dates.length > 0" class="chart-container">
             <h3>{{ experiment.chartData.title }}</h3>
             <div :id="'chart-' + experiment.experimentID" style="width: 100%; height: 400px;"></div>
           </div>
 
-          <!-- Botó de modificar -->
-          <button @click="editExperiment(experiment)" :disabled="isAdmin === false && experiment.comprovacio === 'acceptat'">
+          <!-- Edit and Delete Buttons -->
+          <button @click="editExperiment(experiment)" :disabled="isAdmin === false && experiment.comprovacio === 'acceptat'" class="styled-button">
             Modifica
           </button>
-          <button @click="deleteExperiment(experiment.experimentID)" :disabled="isAdmin === false && experiment.comprovacio === 'acceptat'">
+          <button @click="deleteExperiment(experiment.experimentID)" :disabled="isAdmin === false && experiment.comprovacio === 'acceptat'" class="styled-button" id="eliminaButton">
             Elimina
           </button>
-          <p v-if="experiment.comprovacio === 'acceptat'" style="color: red;">Aquest experiment està completat i no es pot modificar.</p>
+          <p v-if="experiment.comprovacio === 'acceptat'" class="error-message">Aquest experiment està completat i no es pot modificar.</p>
         </div>
       </li>
     </ul>
 
-    <!-- Formulari modal per editar l'experiment (edit modal) -->
-    <div v-if="editingExperiment" class="modal">
+    <!-- Edit Experiment Modal -->
+    <div v-if="editingExperiment" class="modal-overlay" @click.self="closeEditForm">
       <div class="modal-content">
         <h2>Edita l'experiment</h2>
-        <form @submit.prevent="updateExperiment">
+        <form @submit.prevent="updateExperiment" class="edit-form">
           <label>
             Nom:
-            <input v-model="editingExperiment.nom_experiment" type="text" :disabled="isEditingDisabled"/>
+            <input v-model="editingExperiment.nom_experiment" type="text" :disabled="isEditingDisabled" class="styled-input" />
           </label>
           <label>
             Estat:
-            <select v-model="editingExperiment.estat" :disabled="isEditingDisabled">
+            <select v-model="editingExperiment.estat" :disabled="isEditingDisabled" class="styled-select">
               <option value="pendent">pendent</option>
               <option value="acabat">acabat</option>
               <option value="en process">en procés</option>
@@ -109,53 +113,60 @@
           </label>
           <label>
             Catalitzador:
-            <select v-model="editingExperiment.catalitzador" :disabled="isEditingDisabled">
+            <select v-model="editingExperiment.catalitzador" :disabled="isEditingDisabled" class="styled-select">
               <option value="enzim">enzim</option>
             </select>
           </label>
           <label>
             pH:
-            <input v-model.number="editingExperiment.ph" type="number" step="0.1" min="0" max="14" :disabled="isEditingDisabled" />
+            <input v-model.number="editingExperiment.ph" type="number" step="0.1" min="0" max="14" :disabled="isEditingDisabled" class="styled-input" />
           </label>
           <label>
             Temps:
-            <input v-model.number="editingExperiment.temps" type="number" min="0" :disabled="isEditingDisabled" />
+            <input v-model.number="editingExperiment.temps" type="number" min="0" :disabled="isEditingDisabled" class="styled-input" />
           </label>
           <label>
             Temperatura:
-            <input v-model.number="editingExperiment.temperatura" type="number" :disabled="isEditingDisabled" />
+            <input v-model.number="editingExperiment.temperatura" type="number" :disabled="isEditingDisabled" class="styled-input" />
           </label>
           <label>
             Concentració:
-            <input v-model.number="editingExperiment.concentracio" type="number" step="0.1" min="0" max="100" :disabled="isEditingDisabled" />
+            <input v-model.number="editingExperiment.concentracio" type="number" step="0.1" min="0" max="100" :disabled="isEditingDisabled" class="styled-input" />
           </label>
           <label>
             Grams:
-            <input v-model.number="editingExperiment.grams" type="number" min="0" step="0.1" :disabled="isEditingDisabled" />
+            <input v-model.number="editingExperiment.grams" type="number" min="0" step="0.1" :disabled="isEditingDisabled" class="styled-input" />
           </label>
           <label>
             Component:
-            <select v-model="editingExperiment.componentID" :disabled="isEditingDisabled">
-              <!-- <option value="" disabled>Selecciona un component</option> -->
+            <select v-model="editingExperiment.componentID" :disabled="isEditingDisabled" class="styled-select">
               <option v-for="component in components" :key="component.componentID" :value="component.componentID">
                 {{ component.nom }}
               </option>
             </select>
-            <p v-if="formErrors.componentID" style="color: red;">Si us plau, selecciona un component.</p>
-            <p v-if="formErrors.nom_experiment" style="color: red;">El nom ha de tenir almenys 2 caràcters.</p>
-            <p v-if="formErrors.ph" style="color: red;">Ph ha de ser entre 0.0 i 14.0</p>
-            <p v-if="formErrors.temps" style="color: red;">Temps no pot ser mes petit o igual a 0</p>
-            <p v-if="formErrors.concentracio" style="color: red;">Concentracio ha de ser entre 0 i 100</p>
-            <p v-if="formErrors.grams" style="color: red;">Pes en Grams no pot ser mes petit o igual a 0</p>
           </label>
-          <button type="button" @click="showChartModal = true" :disabled="isEditingDisabled">Modifica el gràfic</button>
-          <button type="submit" :disabled="isEditingDisabled">Desa els canvis</button>
-          <button @click="closeEditForm">Cancel·la</button>
+
+          <!-- Error Messages -->
+          <div class="form-errors">
+            <p v-if="formErrors.componentID" class="error-message">Si us plau, selecciona un component.</p>
+            <p v-if="formErrors.nom_experiment" class="error-message">El nom ha de tenir almenys 2 caràcters.</p>
+            <p v-if="formErrors.ph" class="error-message">Ph ha de ser entre 0.0 i 14.0</p>
+            <p v-if="formErrors.temps" class="error-message">Temps no pot ser mes petit o igual a 0</p>
+            <p v-if="formErrors.concentracio" class="error-message">Concentracio ha de ser entre 0 i 100</p>
+            <p v-if="formErrors.grams" class="error-message">Pes en Grams no pot ser mes petit o igual a 0</p>
+          </div>
+
+          <!-- Chart Button and Modal -->
+          <button type="button" @click="showChartModal = true" :disabled="isEditingDisabled" class="styled-button">Modifica el gràfic</button>
+          <button type="submit" :disabled="isEditingDisabled" class="styled-button submit-button">Desa els canvis</button>
+          <button @click="closeEditForm" class="styled-button cancel-button">Cancel·la</button>
         </form>
+        
+        <!-- Chart Modal -->
         <div v-if="showChartModal" class="modal-overlay" @click.self="closeChartModal">
           <div class="modal-content">
             <CreateChart :chartData="editingExperiment.chartData" @chartData="handleChartData" />
-            <button @click="closeChartModal">Tanca</button>
+            <button @click="closeChartModal" class="styled-button">Tanca</button>
           </div>
         </div>
       </div>
@@ -499,8 +510,129 @@ export default {
 };
 </script>
 
+
 <style scoped>
-.modal {
+/* Container */
+.experiments-container {
+  max-width: 1000px;
+  margin: auto;
+  padding: 20px;
+  background-color: #f7f9fc;
+}
+
+/* Header */
+.header-section {
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+/* Buttons */
+.toggle-button, .styled-button {
+  margin: 10px;
+  padding: 10px 15px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.toggle-button:hover, .styled-button:hover {
+  background-color: #0056b3;
+}
+
+#eliminaButton{
+  background-color: red;
+}
+
+#eliminaButton:hover{
+  background-color: rgb(114, 8, 8);
+}
+
+.submit-button {
+  background-color: #28a745;
+}
+
+.cancel-button {
+  background-color: #dc3545;
+}
+
+/* Filters and Inputs */
+.filters-section, .filter-inputs, .sorting-options {
+  margin: 15px 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+
+.styled-input, .styled-select {
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  min-width: 150px;
+}
+
+.radio-label {
+  margin-right: 15px;
+}
+
+/* Experiments List */
+.experiments-list {
+  list-style: none;
+  padding: 0;
+}
+
+.experiment-item {
+  background-color: #ffffff;
+  border: 1px solid #ddd;
+  padding: 15px;
+  margin: 10px 0;
+  border-radius: 5px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  transition: transform 0.2s;
+}
+
+.experiment-item:hover {
+  transform: scale(1.02);
+}
+
+.experiment-info {
+  font-weight: bold;
+}
+
+/* Modal Styling */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-content {
+  background: white;
+  padding: 20px;
+  border-radius: 5px;
+  max-width: 500px;
+  width: 100%;
+}
+
+.edit-form label {
+  display: block;
+  margin-bottom: 10px;
+}
+
+.error-message {
+  color: red;
+  margin-top: 5px;
+}
+
+/*OLD ones/////////////////////////////////////////////////////////*/
+/* .modal {
   position: fixed;
   top: 0;
   left: 0;
@@ -530,5 +662,5 @@ export default {
   border-radius: 5px;
   width: 90%;
   max-width: 500px;
-}
+} */
 </style>

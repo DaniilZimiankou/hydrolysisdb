@@ -1,75 +1,82 @@
 <template>
-    <div>
-      <h1>Llista d'Experiments Pendents per acceptacio</h1>
-  
-      <!-- Botó per obrir/tancar les opcions del filtre -->
-      <button @click="toggleFilterOptions">
-        {{ showFilters ? 'Tanca filtres' : 'Mostra filtres' }}
-      </button>
-  
-      <!-- Secció de Filtres -->
-      <div v-if="showFilters">
-        <!-- Inputs de filtres -->
-        <div>
-          <input v-model="filters.name" placeholder="Filtra per nom" />
-          <input v-model.number="filters.id" type="number" placeholder="Filtra per ID" />
-          <select v-model="filters.component" @change="applyFilters">
-            <option value="">qualsevol component</option>
-            <option v-for="component in components" :key="component" :value="component">
-              {{ component }}
-            </option>
-          </select>
-        </div>
-  
-        <!-- Opcions de classificació -->
-        <div>
-          <label>
-            <input type="radio" v-model="sortOption" value="id" />
-            Ordena per ID
-          </label>
-          <label>
-            <input type="radio" v-model="sortOption" value="name" />
-            Ordena per Nom
-          </label>
-        </div>
+  <div class="experiments-container">
+    <!-- Header Section -->
+    <h1>Llista d'Experiments Pendents per acceptacio</h1>
+
+    <!-- Toggle Filter Options Button -->
+    <button @click="toggleFilterOptions" class="toggle-button">
+      {{ showFilters ? 'Tanca filtres' : 'Mostra filtres' }}
+    </button>
+
+    <!-- Filter Section -->
+    <div v-if="showFilters" class="filters-section">
+      <!-- Filter Inputs -->
+      <div class="filter-inputs">
+        <input v-model="filters.name" placeholder="Filtra per nom" class="styled-input" />
+        <input v-model.number="filters.id" type="number" placeholder="Filtra per ID" class="styled-input" />
+        <select v-model="filters.component" @change="applyFilters" class="styled-select">
+          <option value="">qualsevol component</option>
+          <option v-for="component in components" :key="component" :value="component">
+            {{ component }}
+          </option>
+        </select>
       </div>
 
-      <div v-if="noExperiment">
-        <h1>No tens experiments per acceptar/denegar</h1>
+      <!-- Sorting Options -->
+      <div class="sorting-options">
+        <label class="radio-label">
+          <input type="radio" v-model="sortOption" value="id" />
+          Ordena per ID
+        </label>
+        <label class="radio-label">
+          <input type="radio" v-model="sortOption" value="name" />
+          Ordena per Nom
+        </label>
       </div>
-  
-      <!-- Llista d'Experiments -->
-      <ul>
-        <li v-for="experiment in sortedAndFilteredExperiments" :key="experiment.experimentID">
-          <span>{{ experiment.experimentID }}: {{ experiment.nom_experiment }}</span>
-          <button @click="toggleDetails(experiment.experimentID)">
-            {{ experiment.showDetails ? 'Tanca' : 'Obre' }}
-          </button>
-          <button @click="acceptOdenyExperiment(experiment.experimentID, 'acceptat')">Acceptar</button>
-          <button @click="acceptOdenyExperiment(experiment.experimentID, 'denegat')">Denegar</button>
-          
-          <div v-if="experiment.showDetails">
-            <p>Estat: {{ experiment.estat }}</p>
-            <p>Verificació: {{ experiment.comprovacio }}</p>
-            <p>Catalitzador: {{ experiment.catalitzador }}</p>
-            <p>pH: {{ experiment.ph }}</p>
-            <p>Temps: {{ experiment.temps }} minuts</p>
-            <p>Temperatura: {{ experiment.temperatura }} °C</p>
-            <p>Concentració: {{ experiment.concentracio }} g/L</p>
-            <p>Tipus: {{ experiment.tipus }}</p>
-            <p>Grams: {{ experiment.grams }} g</p>
-            <p>Nom: {{ experiment.nom }}</p>
-            
-            <!-- Render grafic si hi ha dades del grafic -->
-            <div v-if="experiment.chartData.dates.length > 0" :id="'chart-' + experiment.experimentID">
-              <h3>{{ experiment.chartData.title }}</h3>
-              <div :id="'chart-' + experiment.experimentID" style="width: 100%; height: 400px;"></div>
-            </div>
-          </div>
-        </li>
-      </ul>
     </div>
-  </template>
+
+    <!-- No Experiments Message -->
+    <div v-if="noExperiment" class="no-experiments">
+      <h2>No tens experiments per acceptar/denegar</h2>
+    </div>
+
+    <!-- List of Experiments -->
+    <ul class="experiments-list">
+      <li v-for="experiment in sortedAndFilteredExperiments" :key="experiment.experimentID" class="experiment-item">
+        <div class="experiment-header">
+          <span class="experiment-info">{{ experiment.experimentID }}: {{ experiment.nom_experiment }}</span>
+          <div class="experiment-actions">
+            <button @click="toggleDetails(experiment.experimentID)" class="toggle-button">
+              {{ experiment.showDetails ? 'Tanca' : 'Obre' }}
+            </button>
+            <button @click="acceptOdenyExperiment(experiment.experimentID, 'acceptat')" class="styled-button accept-button">Acceptar</button>
+            <button @click="acceptOdenyExperiment(experiment.experimentID, 'denegat')" class="styled-button deny-button">Denegar</button>
+          </div>
+        </div>
+
+        <!-- Experiment Details -->
+        <div v-if="experiment.showDetails" class="experiment-details">
+          <p><strong>Estat:</strong> {{ experiment.estat }}</p>
+          <p><strong>Verificació:</strong> {{ experiment.comprovacio }}</p>
+          <p><strong>Catalitzador:</strong> {{ experiment.catalitzador }}</p>
+          <p><strong>pH:</strong> {{ experiment.ph }}</p>
+          <p><strong>Temps:</strong> {{ experiment.temps }} minuts</p>
+          <p><strong>Temperatura:</strong> {{ experiment.temperatura }} °C</p>
+          <p><strong>Concentració:</strong> {{ experiment.concentracio }} g/L</p>
+          <p><strong>Tipus:</strong> {{ experiment.tipus }}</p>
+          <p><strong>Grams:</strong> {{ experiment.grams }} g</p>
+          <p><strong>Nom:</strong> {{ experiment.nom }}</p>
+
+          <!-- Render Chart if Data Exists -->
+          <div v-if="experiment.chartData.dates.length > 0" class="chart-container">
+            <h3>{{ experiment.chartData.title }}</h3>
+            <div :id="'chart-' + experiment.experimentID" style="width: 100%; height: 400px;"></div>
+          </div>
+        </div>
+      </li>
+    </ul>
+  </div>
+</template>
   
   <script>
   import axios from 'axios';
@@ -274,6 +281,115 @@
   </script>
   
   <style scoped>
+/* Container */
+.experiments-container {
+  max-width: 1000px;
+  margin: auto;
+  padding: 20px;
+}
+
+/* Header */
+h1 {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+/* Buttons */
+.toggle-button, .styled-button {
+  margin: 10px;
+  padding: 10px 15px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.toggle-button:hover, .styled-button:hover {
+  background-color: #0056b3;
+}
+
+.accept-button {
+  background-color: #28a745;
+}
+
+.deny-button {
+  background-color: #dc3545;
+}
+
+/* Filters and Inputs */
+.filters-section, .filter-inputs, .sorting-options {
+  margin: 15px 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+
+.styled-input, .styled-select {
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  min-width: 150px;
+}
+
+.radio-label {
+  margin-right: 15px;
+}
+
+/* No Experiments Message */
+.no-experiments {
+  text-align: center;
+  margin: 20px 0;
+}
+
+/* Experiments List */
+.experiments-list {
+  list-style: none;
+  padding: 0;
+}
+
+.experiment-item {
+  background-color: #ffffff;
+  border: 1px solid #ddd;
+  padding: 15px;
+  margin: 10px 0;
+  border-radius: 5px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  transition: transform 0.2s;
+}
+
+.experiment-item:hover {
+  transform: scale(1.02);
+}
+
+.experiment-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.experiment-info {
+  font-weight: bold;
+}
+
+.experiment-actions {
+  display: flex;
+  gap: 10px;
+}
+
+/* Experiment Details */
+.experiment-details {
+  margin-top: 10px;
+  padding: 10px;
+  border-top: 1px solid #ddd;
+}
+
+/* Chart Container */
+.chart-container {
+  margin-top: 20px;
+}
+</style>
+  <!-- <style scoped>
   button {
     margin: 10px 0;
     padding: 5px 10px;
@@ -291,4 +407,4 @@
   label {
     margin-right: 15px;
   }
-  </style>
+  </style> -->

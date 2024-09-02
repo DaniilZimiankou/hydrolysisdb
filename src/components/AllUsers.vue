@@ -1,103 +1,113 @@
 <template>
-    <div>
-      <div>
-        <h1>Els meus usuaris</h1>
-      </div>
-  
-      <!-- Botó per obrir o tencar les opcions de filtre -->
-      <button @click="toggleFilterOptions">
-        {{ showFilters ? 'Tanca filtres' : 'Mostra filtres' }}
-      </button>
-  
-      <!-- Secció dels filtres -->
-      <div v-if="showFilters">
-        <!-- Inputs dels filtres -->
-        <div>
-          <input v-model="filters.name" placeholder="Filtra per nom" />
-          <input v-model.number="filters.id" type="number" placeholder="Filtra per ID" />
-          <input v-model="filters.email" placeholder="Filtra per email" />
-        </div>
-  
-        <!-- Opcions d'ordenacio -->
-        <div>
-          <label>
-            <input type="radio" v-model="sortOption" value="id" />
-            Ordena per ID
-          </label>
-          <label>
-            <input type="radio" v-model="sortOption" value="name" />
-            Ordena per nom
-          </label>
-        </div>
+  <div class="users-container">
+    <!-- Header Section -->
+    <div class="header-section">
+      <h1>Els usuaris</h1>
+    </div>
+
+    <!-- Button to Toggle Filter Options -->
+    <button @click="toggleFilterOptions" class="toggle-button">
+      {{ showFilters ? 'Tanca filtres' : 'Mostra filtres' }}
+    </button>
+
+    <!-- Filter Section -->
+    <div v-if="showFilters" class="filters-section">
+      <!-- Filter Inputs -->
+      <div class="filter-inputs">
+        <input v-model="filters.name" placeholder="Filtra per nom" class="styled-input" />
+        <input v-model.number="filters.id" type="number" placeholder="Filtra per ID" class="styled-input" />
+        <input v-model="filters.email" placeholder="Filtra per email" class="styled-input" />
       </div>
 
-      <div v-if="noUsuaris">
-        <h1>No tens usuaris en la app</h1>
-        <p>Els hi pots crear en l'apartat "Crear Usuaris"</p>
+      <!-- Sorting Options -->
+      <div class="sorting-options">
+        <label class="radio-label">
+          <input type="radio" v-model="sortOption" value="id" />
+          Ordena per ID
+        </label>
+        <label class="radio-label">
+          <input type="radio" v-model="sortOption" value="name" />
+          Ordena per nom
+        </label>
       </div>
-  
-      <ul>
-        <li v-for="usuari in sortedAndFilteredusuaris" :key="usuari.usuariID">
-          <span>{{ usuari.usuariID }}: {{ usuari.email }}: {{ usuari.nom }}</span>
-          <button @click="toggleDetails(usuari.usuariID)">
-            {{ usuari.showDetails ? 'Tanca' : 'Obre' }}
-          </button>
-  
-          <div v-if="usuari.showDetails">
-            <p>Nom: {{ usuari.nom }}</p>
-            <p>Cognoms: {{ usuari.cognoms }}</p>
-            <p>Email: {{ usuari.email }}</p>
-            <p>Rol: {{ usuari.rol }}</p>
-  
-            <!-- Botó de modificar -->
-            <button @click="editusuari(usuari)">
-              Modifica
-            </button>
-          </div>
-        </li>
-      </ul>
-  
-      <!-- Formulari modal per editar l'usuari (edit modal) -->
-      <div v-if="editingusuari" class="modal">
-        <div class="modal-content">
-          <h2>Modificar dades</h2>
-          <form @submit.prevent="updateusuari">
-            <label>
-              Nom:
-              <input v-model="editingusuari.nom" type="text"/>
-            </label>
-            <label>
-              Cognoms:
-              <input v-model="editingusuari.cognoms" type="text"/>
-            </label>
-            <label>
-              Email:
-              <input v-model="editingusuari.email" type="email"/>
-            </label>
-            <label>
+    </div>
+
+    <!-- No Users Message -->
+    <div v-if="noUsuaris" class="no-users">
+      <h1>No tens usuaris en la app</h1>
+      <p>Els hi pots crear en l'apartat "Crear Usuaris"</p>
+    </div>
+
+    <!-- Users List -->
+    <ul class="users-list">
+      <li v-for="usuari in sortedAndFilteredusuaris" :key="usuari.usuariID" class="user-item">
+        <span class="user-info">{{ usuari.usuariID }}: {{ usuari.email }}: {{ usuari.nom }}</span>
+        <button @click="toggleDetails(usuari.usuariID)" class="toggle-button">
+          {{ usuari.showDetails ? 'Tanca' : 'Obre' }}
+        </button>
+
+        <!-- User Details -->
+        <div v-if="usuari.showDetails" class="user-details">
+          <p>Nom: {{ usuari.nom }}</p>
+          <p>Cognoms: {{ usuari.cognoms }}</p>
+          <p>Email: {{ usuari.email }}</p>
+          <p>Rol: {{ usuari.rol }}</p>
+
+          <!-- Edit Button -->
+          <button @click="editusuari(usuari)" class="styled-button">Modifica</button>
+        </div>
+      </li>
+    </ul>
+
+    <!-- Edit User Modal -->
+    <div v-if="editingusuari" class="modal-overlay" @click.self="closeEditForm">
+      <div class="modal-content">
+        <h2>Modificar dades</h2>
+        <form @submit.prevent="updateusuari" class="edit-form">
+          <label>
+            Nom:
+            <input v-model="editingusuari.nom" type="text" class="styled-input" />
+          </label>
+          <label>
+            Cognoms:
+            <input v-model="editingusuari.cognoms" type="text" class="styled-input" />
+          </label>
+          <label>
+            Email:
+            <input v-model="editingusuari.email" type="email" class="styled-input" />
+          </label>
+          <label>
             Rol:
-            <select v-model="editingusuari.rol">
+            <select v-model="editingusuari.rol" class="styled-select">
               <option value="tecnic">tecnic</option>
               <option value="administrador">administrador</option>
             </select>
-            <p v-if="formErrors.cognoms" style="color: red;">Els cognoms han de tenir almenys 2 caràcters.</p>
-            <p v-if="formErrors.nom" style="color: red;">El nom ha de tenir almenys 2 caràcters.</p>
-            <p v-if="formErrors.emailOcupat" style="color: red;">El correu electrònic ja està ocupat.</p>
-            <p v-if="formErrors.email" style="color: red;">El format de correu electrònic no es correcte.</p>
           </label>
-            <button type="button" @click="openConfirmModal">Desa els canvis</button>
-            <button type="button" @click="closeEditForm">Cancel·la</button>
-          </form>
-          <ConfirmationModal
-            :isVisible="showConfirmModal"
-            message="Estàs segur que vols desar els canvis?"
-            @confirm="handleConfirm"
-            @cancel="showConfirmModal = false"
-          />
-        </div>
+
+          <!-- Error Messages -->
+          <div class="form-errors">
+            <p v-if="formErrors.cognoms" class="error-message">Els cognoms han de tenir almenys 2 caràcters.</p>
+            <p v-if="formErrors.nom" class="error-message">El nom ha de tenir almenys 2 caràcters.</p>
+            <p v-if="formErrors.emailOcupat" class="error-message">El correu electrònic ja està ocupat.</p>
+            <p v-if="formErrors.email" class="error-message">El format de correu electrònic no es correcte.</p>
+          </div>
+
+          <!-- Save and Cancel Buttons -->
+          <button type="button" @click="openConfirmModal" class="styled-button submit-button">Desa els canvis</button>
+          <button type="button" @click="closeEditForm" class="styled-button cancel-button">Cancel·la</button>
+        </form>
+
+        <!-- Confirmation Modal -->
+        <ConfirmationModal
+          :isVisible="showConfirmModal"
+          message="Estàs segur que vols desar els canvis?"
+          @confirm="handleConfirm"
+          @cancel="showConfirmModal = false"
+        />
       </div>
     </div>
-  </template>
+  </div>
+</template>
   
   <script>
   import axios from 'axios';
@@ -268,7 +278,112 @@
   };
   </script>
   
+
   <style scoped>
+/* Container */
+.users-container {
+  max-width: 1000px;
+  margin: auto;
+  padding: 20px;
+}
+
+/* Header */
+.header-section {
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+/* Buttons */
+.toggle-button, .styled-button {
+  margin: 10px;
+  padding: 10px 15px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.toggle-button:hover, .styled-button:hover {
+  background-color: #0056b3;
+}
+
+.submit-button {
+  background-color: #28a745;
+}
+
+.cancel-button {
+  background-color: #dc3545;
+}
+
+/* Filters and Inputs */
+.filters-section, .filter-inputs, .sorting-options {
+  margin: 15px 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+
+.styled-input, .styled-select {
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  min-width: 150px;
+}
+
+.radio-label {
+  margin-right: 15px;
+}
+
+/* Users List */
+.users-list {
+  list-style: none;
+  padding: 0;
+}
+
+.user-item {
+  padding: 15px;
+  margin: 10px 0;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+}
+
+.user-info {
+  font-weight: bold;
+}
+
+/* Modal Styling */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-content {
+  background: white;
+  padding: 20px;
+  border-radius: 5px;
+  max-width: 500px;
+  width: 100%;
+}
+
+.edit-form label {
+  display: block;
+  margin-bottom: 10px;
+}
+
+.error-message {
+  color: red;
+  margin-top: 5px;
+}
+
+/*OLD ones////////////////////////////////////////////*/
   .modal {
     position: fixed;
     top: 0;

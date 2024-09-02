@@ -1,22 +1,25 @@
 <template>
-  <div>
-    <h1>Llista d'Experiments Completats i Acceptats</h1>
-    <div v-if="isDirectRoute">
-      <button @click="navigateToLogin">Inicia Sessió</button>
+  <div class="experiments-container">
+    <!-- Header Title -->
+    <h1 class="experiments-title">Llista d'Experiments Completats i Acceptats</h1>
+
+    <!-- Login Button for Direct Route -->
+    <div v-if="isDirectRoute" class="login-section">
+      <button class="styled-button" @click="navigateToLogin">Inicia Sessió</button>
     </div>
 
-    <!-- Botó per obrir/tancar les opcions del filtre -->
-    <button @click="toggleFilterOptions">
+    <!-- Toggle Filter Options Button -->
+    <button class="toggle-filters-button styled-button" @click="toggleFilterOptions">
       {{ showFilters ? 'Tanca filtres' : 'Mostra filtres' }}
     </button>
 
-    <!-- Secció de Filtres -->
-    <div v-if="showFilters">
-      <!-- Inputs de filtres -->
-      <div>
-        <input v-model="filters.name" placeholder="Filtra per nom" />
-        <input v-model.number="filters.id" type="number" placeholder="Filtra per ID" />
-        <select v-model="filters.component" @change="applyFilters">
+    <!-- Filter Section -->
+    <div v-if="showFilters" class="filter-section">
+      <!-- Filter Inputs -->
+      <div class="filter-inputs">
+        <input v-model="filters.name" placeholder="Filtra per nom" class="styled-input" />
+        <input v-model.number="filters.id" type="number" placeholder="Filtra per ID" class="styled-input" />
+        <select v-model="filters.component" @change="applyFilters" class="styled-select">
           <option value="">qualsevol component</option>
           <option v-for="component in components" :key="component" :value="component">
             {{ component }}
@@ -24,32 +27,34 @@
         </select>
       </div>
 
-      <!-- Opcions de classificació -->
-      <div>
-        <label>
+      <!-- Sort Options -->
+      <div class="sort-options">
+        <label class="styled-label">
           <input type="radio" v-model="sortOption" value="id" />
           Ordena per ID
         </label>
-        <label>
+        <label class="styled-label">
           <input type="radio" v-model="sortOption" value="name" />
           Ordena per Nom
         </label>
       </div>
     </div>
 
-    <div v-if="noExperiment">
-        <h1>De moment no hi han experiment en la Base de Dates</h1>
+    <!-- No Experiment Message -->
+    <div v-if="noExperiment" class="no-experiment">
+      <h2>De moment no hi han experiment en la Base de Dates</h2>
     </div>
 
-    <!-- Llista d'Experiments -->
-    <ul>
-      <li v-for="experiment in sortedAndFilteredExperiments" :key="experiment.experimentID">
-        <span>{{ experiment.experimentID }}: {{ experiment.nom_experiment }}</span>
-        <button @click="toggleDetails(experiment.experimentID)">
+    <!-- Experiments List -->
+    <ul class="experiments-list">
+      <li v-for="experiment in sortedAndFilteredExperiments" :key="experiment.experimentID" class="experiment-item">
+        <span class="experiment-title">{{ experiment.experimentID }}: {{ experiment.nom_experiment }}</span>
+        <button class="details-button styled-button" @click="toggleDetails(experiment.experimentID)">
           {{ experiment.showDetails ? 'Tanca' : 'Obre' }}
         </button>
-        
-        <div v-if="experiment.showDetails">
+
+        <!-- Experiment Details -->
+        <div v-if="experiment.showDetails" class="experiment-details">
           <p>Estat: {{ experiment.estat }}</p>
           <p>Verificació: {{ experiment.comprovacio }}</p>
           <p>Catalitzador: {{ experiment.catalitzador }}</p>
@@ -60,8 +65,8 @@
           <p>Tipus: {{ experiment.tipus }}</p>
           <p>Grams: {{ experiment.grams }} g</p>
           <p>Nom: {{ experiment.nom }}</p>
-          
-          <!-- Render grafic si hi ha dades del grafic -->
+
+          <!-- Render Graph if Chart Data Exists -->
           <div v-if="experiment.chartData.dates.length > 0" :id="'chart-' + experiment.experimentID">
             <h3>{{ experiment.chartData.title }}</h3>
             <div :id="'chart-' + experiment.experimentID" style="width: 100%; height: 400px;"></div>
@@ -250,6 +255,127 @@ export default {
 </script>
 
 <style scoped>
+/* Container and Title */
+.experiments-container {
+  padding: 20px;
+  max-width: 1000px;
+  margin: 0 auto;
+  background-color: #f7f9fc;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.experiments-title {
+  text-align: center;
+  color: #333;
+  font-size: 2rem;
+  margin-bottom: 20px;
+}
+
+/* Button Styles */
+.styled-button {
+  background-color: #007bff;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.2s;
+  margin: 5px;
+}
+
+.styled-button:hover {
+  background-color: #0056b3;
+  transform: scale(1.05);
+}
+
+.toggle-filters-button {
+  display: block;
+  margin: 0 auto;
+}
+
+/* Filter Section */
+.filter-section {
+  margin: 20px 0;
+  padding: 10px;
+  background-color: #ffffff;
+  border-radius: 5px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.filter-inputs {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.styled-input,
+.styled-select {
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  width: 100%;
+}
+
+.sort-options {
+  display: flex;
+  gap: 20px;
+}
+
+.styled-label {
+  font-size: 1rem;
+}
+
+/* No Experiment Message */
+.no-experiment {
+  text-align: center;
+  margin-top: 20px;
+  color: #777;
+}
+
+/* Experiment List */
+.experiments-list {
+  list-style: none;
+  padding: 0;
+  margin-top: 20px;
+}
+
+.experiment-item {
+  background-color: #ffffff;
+  padding: 15px;
+  margin-bottom: 10px;
+  border-radius: 5px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  transition: transform 0.2s;
+}
+
+.experiment-item:hover {
+  transform: scale(1.02);
+}
+
+.experiment-title {
+  font-weight: bold;
+  color: #333;
+}
+
+.details-button {
+  margin-left: 10px;
+}
+
+/* Experiment Details */
+.experiment-details {
+  margin-top: 10px;
+  padding: 10px;
+  background-color: #f0f4f8;
+  border-radius: 5px;
+}
+
+.experiment-details p {
+  margin: 5px 0;
+}
+</style>
+
+<!-- <style scoped>
 button {
   margin: 10px 0;
   padding: 5px 10px;
@@ -267,4 +393,4 @@ select {
 label {
   margin-right: 15px;
 }
-</style>
+</style> -->
